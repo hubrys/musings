@@ -1,7 +1,7 @@
 use crate::math::{self, Vector2};
 
 pub struct Boid {
-  pos: Vector2
+  pub pos: Vector2
 }
 
 impl Boid {
