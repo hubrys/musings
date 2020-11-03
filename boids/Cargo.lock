@@ -90,6 +90,7 @@ dependencies = [
  "piston2d-graphics",
  "piston2d-opengl_graphics",
  "pistoncore-glutin_window",
+ "vecmath",
 ]
 
 [[package]]
