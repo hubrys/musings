@@ -9,6 +9,7 @@ use amethyst::{
   },
   utils::application_root_dir
 };
+use crate::config::FlockConfig;
 
 mod boids;
 mod components;
@@ -41,7 +42,11 @@ fn main() -> amethyst::Result<()> {
     .with_system_desc(systems::MoveBoidsSystem, "move_boids", &["direct_boids"]);
 
   let assets_dir = app_root.join("assets");
-  let mut game = Application::new(assets_dir, boids::Flock::default(), game_data)?;
+  let flock_config = FlockConfig::load(app_root.join("config/flock.ron")).unwrap();
+  // world.insert(flock_config);
+  let mut game = Application::build(assets_dir, boids::Flock::default())?
+    .with_resource(flock_config)
+    .build(game_data)?;
   game.run();
   Ok(())
 }

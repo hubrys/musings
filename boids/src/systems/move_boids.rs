@@ -4,11 +4,7 @@ use amethyst::derive::SystemDesc;
 
 use crate::components::{Boid, TurnDirection};
 use crate::utils::deg_to_rad;
-
-/// In units per second
-const BOID_SPEED: f32 = 10.0;
-/// In degrees per second
-const TURN_SPEED: f32 = 180.0;
+use crate::config::FlockConfig;
 
 /// Moves boids based on their current state
 #[derive(SystemDesc)]
@@ -16,24 +12,43 @@ pub struct MoveBoidsSystem;
 
 impl<'s> System<'s> for MoveBoidsSystem {
   type SystemData = (
-    Read<'s, Time>,
     ReadStorage<'s, Boid>,
     WriteStorage<'s, Transform>,
+    Read<'s, Time>,
+    Read<'s, FlockConfig>,
   );
 
-  fn run(&mut self, (time, boids, mut transforms): Self::SystemData) {
+  fn run(&mut self, (
+    boids,
+    mut transforms,
+    time,
+    flock
+  ): Self::SystemData) {
     for (boid, transform) in (&boids, &mut transforms).join() {
       // apply the new rotation
       // move the boid the new direction based on speed
       let rotation_delta = match boid.turn_direction {
         TurnDirection::None => 0.0,
-        TurnDirection::Left => -TURN_SPEED,
-        TurnDirection::Right => TURN_SPEED
+        TurnDirection::Left => -flock.turning_speed,
+        TurnDirection::Right => flock.turning_speed
       } * time.delta_seconds();
 
       transform.rotate_2d(deg_to_rad(rotation_delta));
       // Using move up, as we are pointing down the z-axis
-      transform.move_up(BOID_SPEED * time.delta_seconds());
+      transform.move_up(flock.boid_speed * time.delta_seconds());
+
+      let translation = transform.translation_mut();
+      if translation.x < 0.0 {
+        translation.x = flock.arena_size[0];
+      } else if translation.x > flock.arena_size[0] {
+        translation.x = 0.0;
+      }
+
+      if translation.y < 0.0 {
+        translation.y = flock.arena_size[1];
+      } else if translation.y > flock.arena_size[1] {
+        translation.y = 0.0;
+      }
     }
   }
 }

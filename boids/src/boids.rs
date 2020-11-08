@@ -6,6 +6,8 @@ use amethyst::renderer::{Camera, SpriteSheet, Texture, ImageFormat, SpriteSheetF
 use amethyst::assets::{Handle, Loader, AssetStorage};
 use amethyst::core::math::Vector3;
 use crate::components::Boid;
+use crate::config::FlockConfig;
+use amethyst::utils::application_root_dir;
 
 pub const WINDOW_WIDTH: f32 = 1200.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
@@ -16,8 +18,13 @@ pub struct Flock {}
 impl SimpleState for Flock {
   fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
     let world = data.world;
+    let arena_size = {
+      let config = world.read_resource::<FlockConfig>();
+      config.arena_size
+    };
+
     create_boid(world);
-    init_camera(world);
+    init_camera(world, arena_size);
   }
 
   fn handle_event(
@@ -38,12 +45,13 @@ impl SimpleState for Flock {
   }
 }
 
-fn init_camera(world: &mut World) {
+fn init_camera(world: &mut World, arena_size: [f32; 2]) {
+  let [width, height] = arena_size;
   let mut transform = Transform::default();
-  transform.set_translation_xyz(0.0, 0.0, 1.0);
+  transform.set_translation_xyz(width / 2.0, height / 2.0, 1.0);
   world
     .create_entity()
-    .with(Camera::standard_2d(WINDOW_WIDTH, WINDOW_HEIGHT))
+    .with(Camera::standard_2d(width, height))
     .with(transform)
     .build();
 }
