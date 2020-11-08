@@ -1,0 +1,8 @@
+(
+    axes: {},
+    actions: {
+        "quit": [[Key(Escape)]],
+        "left": [[Key(Left)]],
+        "right": [[Key(Right)]],
+    }
+)
