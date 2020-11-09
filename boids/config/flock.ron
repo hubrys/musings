@@ -1,5 +1,6 @@
 (
     arena_size: (1200.0, 800.0),
+    boid_count: 100,
     boid_speed: 200.0,
     turning_speed: 180.0,
 )
