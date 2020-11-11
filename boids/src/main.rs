@@ -15,7 +15,6 @@ mod boids;
 mod components;
 mod systems;
 mod config;
-mod types;
 mod utils;
 
 fn main() -> amethyst::Result<()> {

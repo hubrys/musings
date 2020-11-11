@@ -5,13 +5,9 @@ use amethyst::core::Transform;
 use amethyst::core::math::{Vector2, Vector3};
 use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode};
 use amethyst::renderer::{Camera, SpriteSheet, Texture, ImageFormat, SpriteSheetFormat, SpriteRender};
-use amethyst::utils::application_root_dir;
+use rand::Rng;
 use crate::components::{BoidIntent, Boid};
 use crate::config::FlockConfig;
-use crate::utils::deg_to_rad;
-
-pub const WINDOW_WIDTH: f32 = 1200.0;
-pub const WINDOW_HEIGHT: f32 = 800.0;
 
 #[derive(Default)]
 pub struct Flock {}
@@ -26,12 +22,15 @@ impl SimpleState for Flock {
 
     let sprite_sheet = load_sprite_sheet(world);
     let sprite_render = SpriteRender::new(sprite_sheet, 0);
+    let mut rng = rand::thread_rng();
     for i in 0..boid_count {
+      let x = rng.gen_range(0.0, arena_size[0]);
+      let y = rng.gen_range(0.0, arena_size[1]);
       let pct = i as f32 / boid_count as f32;
       create_boid(
         world,
         sprite_render.clone(),
-        [arena_size[0] * pct, arena_size[1] * pct],
+        [x, y],
         360.0 * pct
       )
     }
@@ -40,7 +39,7 @@ impl SimpleState for Flock {
 
   fn handle_event(
     &mut self,
-    data: StateData<'_, GameData<'_, '_>>,
+    _data: StateData<'_, GameData<'_, '_>>,
     event: StateEvent,
   ) -> SimpleTrans {
     if let StateEvent::Window(event) = &event {
@@ -71,9 +70,9 @@ fn create_boid(
   world: &mut World,
   sprite: SpriteRender,
   location: [f32; 2],
-  rotation: f32) {
+  _rotation: f32) {
   let mut transform = Transform::default();
-  // transform.set_translation_xyz(location[0], location[1], 0.0);
+  transform.set_translation_xyz(location[0], location[1], 0.0);
   // transform.set_rotation_2d(deg_to_rad(rotation));
   transform.set_scale(Vector3::new(0.1, 0.1, 1.0));
   world
@@ -82,7 +81,7 @@ fn create_boid(
     .with(transform)
     .with(Boid {
       position: Vector2::new(location[0], location[1]),
-      rotation
+      velocity: Vector2::new(0.0, 0.0),
     })
     .with(BoidIntent::default())
     .build();

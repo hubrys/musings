@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 amethyst = { version = "0.15.3", features = [ "metal" ] }
 serde = { version = "1", features = ["derive"] }
+rand = "0.7.3"

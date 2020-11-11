@@ -1,14 +1,10 @@
 use amethyst::ecs::{System, SystemData, ReadStorage, WriteStorage, Join, Read};
-use amethyst::core::{Transform, SystemDesc};
 use amethyst::derive::SystemDesc;
-use amethyst::core::math::{Vector3, Vector2, UnitQuaternion};
+use amethyst::core::math::{Vector2};
 use amethyst::input::{InputHandler, StringBindings};
-use crate::components::{BoidIntent, TurnDirection, Boid};
+use crate::components::{BoidIntent, Boid};
 use crate::config::FlockConfig;
-use amethyst::core::ecs::world::EntitiesRes;
 use amethyst::core::ecs::Entities;
-
-const LOCAL_GROUP_RADIUS: f32 = 100.0;
 
 /// Moves boids based on simple rules
 /// rules:
@@ -25,66 +21,57 @@ impl<'s> System<'s> for DirectBoidsSystems {
     Entities<'s>,
     ReadStorage<'s, Boid>,
     WriteStorage<'s, BoidIntent>,
-    WriteStorage<'s, Transform>,
   );
 
   fn run(&mut self, (
-    input,
+    _input,
     flock,
     ents,
     boids,
-    mut boid_intents,
-    mut transforms
+    mut boid_intents
   ): Self::SystemData) {
-    for (ent, transform, boid, boid_intent) in (&ents, &transforms, &boids, &mut boid_intents).join() {
-      /// TODO: Ignore the current boid
+    for (ent, boid, boid_intent) in (&ents, &boids, &mut boid_intents).join() {
+      // TODO: Ignore the current boid
       // Center of mass
-      let mut com = Vector2::new(0.0, 0.0);
+      let mut com = Vector2::zeros();
       let mut cohesion_count = 0;
-      for (other_ent, other_boid, other_transform) in (&ents, &boids, &transforms).join() {
-        let separation = distance(&boid.position, &other_boid.position);
-        if separation < flock.cohesion_distance {
+      let mut separation_vec = Vector2::zeros();
+
+      let mut velocity_count = 0;
+      let mut average_velocity = Vector2::zeros();
+
+      for (other_ent, other_boid) in (&ents, &boids).join() {
+        // Don't include self in calculations
+        if ent.id() == other_ent.id() {
+          continue;
+        }
+
+        let boid_separation = distance(&boid.position, &other_boid.position);
+        // COHESION
+        if boid_separation < flock.cohesion_distance {
           cohesion_count += 1;
-          let other_translation = other_transform.translation();
-          com.x += other_translation.x;
-          com.y += other_translation.y;
+          com += other_boid.position;
         }
-      }
 
-      com.x /= cohesion_count as f32;
-      com.y /= cohesion_count as f32;
-
-      let com_vec = com - boid.position;
-      let com_angle = com_vec.y.atan2(com_vec.x).to_degrees();
-      let mut angle_diff = com_angle - boid.rotation;
-
-      // if angle_diff.to_degrees() > 180.0 {
-      //   angle_diff = -360.0 + angle_diff;
-      // } else if angle_diff.to_degrees() < -180.0 {
-      //   angle_diff = 360.0 + angle_diff;
-      // }
-
-      // let axis_angle = Vector3::<f32>::z() * com_angle.to_degrees();
-      // let com_quat = UnitQuaternion::new(axis_angle);
-      // let boid_quat = UnitQuaternion::new(Vector3::<f32>::z() * boid.rotation);
-      // let (_, _, result) = com_quat.euler_angles();
-
-      if ent.id() == 0 {
-        // println!("com: {}", com);
-        println!("angle: {} {}", ent.id(), com_angle);
-      }
-
-      boid_intent.turning = if angle_diff < 0.0 { -1.0 } else { 1.0 };
-
-      boid_intent.turning = {
-        if input.action_is_down("left").unwrap() {
-          1.0
-        } else if input.action_is_down("right").unwrap() {
-          -1.0
-        } else {
-          boid_intent.turning
+        // SEPARATION
+        if boid_separation < flock.separation_distance {
+          separation_vec = boid.position - other_boid.position;
         }
-      };
+
+        // ALIGNMENT
+        if boid_separation < flock.alignment_distance {
+          velocity_count += 1;
+          average_velocity += other_boid.velocity;
+        }
+
+      }
+      com /= cohesion_count as f32;
+      average_velocity /= velocity_count as f32;
+      let cohesion_vec = com - boid.position;
+      boid_intent.force =
+        cohesion_vec * flock.cohesion_weight +
+          separation_vec * flock.separation_weight +
+          average_velocity * flock.alignment_weight;
     }
   }
 }
