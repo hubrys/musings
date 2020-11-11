@@ -2,9 +2,10 @@ use amethyst::ecs::{System, SystemData, ReadStorage, WriteStorage, Join, Read};
 use amethyst::core::{Transform, Time, SystemDesc};
 use amethyst::derive::SystemDesc;
 
-use crate::components::{Boid, TurnDirection};
+use crate::components::{BoidIntent, TurnDirection, Boid};
 use crate::utils::deg_to_rad;
 use crate::config::FlockConfig;
+use std::f32::consts::PI;
 
 /// Moves boids based on their current state
 #[derive(SystemDesc)]
@@ -12,43 +13,49 @@ pub struct MoveBoidsSystem;
 
 impl<'s> System<'s> for MoveBoidsSystem {
   type SystemData = (
-    ReadStorage<'s, Boid>,
     WriteStorage<'s, Transform>,
+    WriteStorage<'s, Boid>,
+    ReadStorage<'s, BoidIntent>,
     Read<'s, Time>,
     Read<'s, FlockConfig>,
   );
 
   fn run(&mut self, (
-    boids,
     mut transforms,
+    mut boids,
+    mut boid_intents,
     time,
     flock
   ): Self::SystemData) {
-    for (boid, transform) in (&boids, &mut transforms).join() {
+    for (transform, boid, intent) in (&mut transforms, &mut boids, &boid_intents).join() {
       // apply the new rotation
       // move the boid the new direction based on speed
-      let rotation_delta = match boid.turn_direction {
-        TurnDirection::None => 0.0,
-        TurnDirection::Left => -flock.turning_speed,
-        TurnDirection::Right => flock.turning_speed
-      } * time.delta_seconds();
-
-      transform.rotate_2d(deg_to_rad(rotation_delta));
-      // Using move up, as we are pointing down the z-axis
-      transform.move_up(flock.boid_speed * time.delta_seconds());
-
-      let translation = transform.translation_mut();
-      if translation.x < 0.0 {
-        translation.x = flock.arena_size[0];
-      } else if translation.x > flock.arena_size[0] {
-        translation.x = 0.0;
+      let rotation_delta = intent.turning * flock.turning_speed * time.delta_seconds();
+      boid.rotation += rotation_delta;
+      if boid.rotation < -180.0 {
+        boid.rotation = 180.0 - boid.rotation - 180.0;
+      } else if boid.rotation > 180.0 {
+        boid.rotation = -180.0 + boid.rotation - 180.0;
       }
 
-      if translation.y < 0.0 {
-        translation.y = flock.arena_size[1];
-      } else if translation.y > flock.arena_size[1] {
-        translation.y = 0.0;
+      boid.rotation = boid.rotation.min(180.0).max(-180.0);
+      boid.position.x += boid.rotation.to_radians().cos() * flock.boid_speed * time.delta_seconds();
+      boid.position.y += boid.rotation.to_radians().sin() * flock.boid_speed * time.delta_seconds();
+
+      if boid.position.x < 0.0 {
+        boid.position.x = flock.arena_size[0];
+      } else if boid.position.x > flock.arena_size[0] {
+        boid.position.x = 0.0;
       }
+
+      if boid.position.y < 0.0 {
+        boid.position.y = flock.arena_size[1];
+      } else if boid.position.y > flock.arena_size[1] {
+        boid.position.y = 0.0;
+      }
+
+      transform.set_translation_xyz(boid.position.x, boid.position.y, 0.0);
+      transform.set_rotation_2d(boid.rotation.to_radians() - PI / 2.0);
     }
   }
 }

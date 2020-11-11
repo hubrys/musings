@@ -1,13 +1,13 @@
 use amethyst::prelude::*;
 use amethyst::{SimpleState, StateData, GameData, StateEvent, SimpleTrans, Trans};
-use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode};
-use amethyst::core::Transform;
-use amethyst::renderer::{Camera, SpriteSheet, Texture, ImageFormat, SpriteSheetFormat, SpriteRender};
 use amethyst::assets::{Handle, Loader, AssetStorage};
-use amethyst::core::math::Vector3;
-use crate::components::Boid;
-use crate::config::FlockConfig;
+use amethyst::core::Transform;
+use amethyst::core::math::{Vector2, Vector3};
+use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode};
+use amethyst::renderer::{Camera, SpriteSheet, Texture, ImageFormat, SpriteSheetFormat, SpriteRender};
 use amethyst::utils::application_root_dir;
+use crate::components::{BoidIntent, Boid};
+use crate::config::FlockConfig;
 use crate::utils::deg_to_rad;
 
 pub const WINDOW_WIDTH: f32 = 1200.0;
@@ -73,14 +73,18 @@ fn create_boid(
   location: [f32; 2],
   rotation: f32) {
   let mut transform = Transform::default();
-  transform.set_translation_xyz(location[0], location[1], 0.0);
-  transform.set_rotation_2d(deg_to_rad(rotation));
+  // transform.set_translation_xyz(location[0], location[1], 0.0);
+  // transform.set_rotation_2d(deg_to_rad(rotation));
   transform.set_scale(Vector3::new(0.1, 0.1, 1.0));
   world
     .create_entity()
     .with(sprite)
     .with(transform)
-    .with(Boid::default())
+    .with(Boid {
+      position: Vector2::new(location[0], location[1]),
+      rotation
+    })
+    .with(BoidIntent::default())
     .build();
 }
 

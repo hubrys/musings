@@ -1,6 +1,9 @@
 (
     arena_size: (1200.0, 800.0),
     boid_count: 100,
-    boid_speed: 200.0,
+    boid_speed: 50.0,
     turning_speed: 180.0,
+    separation_distance: 100,
+    cohesion_distance: 400,
+    alignment_distance: 250
 )

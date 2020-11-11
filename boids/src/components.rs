@@ -7,14 +7,25 @@ pub enum TurnDirection {
   Right,
 }
 
+#[derive(Default)]
+pub struct BoidIntent {
+  pub turning: f32,
+}
+
+impl Component for BoidIntent {
+  type Storage = VecStorage<Self>;
+}
+
 pub struct Boid {
-  pub turn_direction: TurnDirection,
+  pub position: Vector2<f32>,
+  pub rotation: f32
 }
 
 impl Default for Boid {
   fn default() -> Self {
     Boid {
-      turn_direction: TurnDirection::None
+      position: Vector2::new(0.0, 0.0),
+      rotation: 0.0
     }
   }
 }
