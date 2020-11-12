@@ -41,17 +41,17 @@ impl<'s> System<'s> for MoveBoidsSystem {
       boid.position.x += boid.velocity.x * time.delta_seconds();
       boid.position.y += boid.velocity.y * time.delta_seconds();
 
-      if boid.position.x < 0.0 {
-        boid.position.x = flock.arena_size[0];
-      } else if boid.position.x > flock.arena_size[0] {
-        boid.position.x = 0.0;
-      }
-
-      if boid.position.y < 0.0 {
-        boid.position.y = flock.arena_size[1];
-      } else if boid.position.y > flock.arena_size[1] {
-        boid.position.y = 0.0;
-      }
+      // if boid.position.x < 0.0 {
+      //   boid.position.x = flock.arena_size[0];
+      // } else if boid.position.x > flock.arena_size[0] {
+      //   boid.position.x = 0.0;
+      // }
+      //
+      // if boid.position.y < 0.0 {
+      //   boid.position.y = flock.arena_size[1];
+      // } else if boid.position.y > flock.arena_size[1] {
+      //   boid.position.y = 0.0;
+      // }
       let angle = boid.velocity.y.atan2(boid.velocity.x);
       transform.set_translation_xyz(boid.position.x, boid.position.y, 0.0);
       transform.set_rotation_2d(angle - PI / 2.0);

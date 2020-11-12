@@ -5,7 +5,7 @@ use amethyst::input::{InputHandler, StringBindings};
 use amethyst::core::ecs::Entities;
 use crate::components::{BoidIntent, Boid};
 use crate::config::FlockConfig;
-use crate::systems::boid_rules::base_rules::{SeparationRule, CohesionRule, AlignmentRule};
+use crate::systems::boid_rules::base_rules::{SeparationRule, CohesionRule, AlignmentRule, BoundaryRule};
 use crate::systems::BoidRule;
 
 /// Moves boids based on simple rules
@@ -32,10 +32,12 @@ impl<'s> System<'s> for DirectBoidsSystems {
     boids,
     mut boid_intents
   ): Self::SystemData) {
+    let boundary = BoundaryRule::create_offset_boundary(
+      flock.arena_size, flock.boundary_offset);
     for (ent, boid, boid_intent) in (&ents, &boids, &mut boid_intents).join() {
-      let mut cohesion = CohesionRule::new(boid.position, flock.cohesion_distance, flock.cohesion_weight);
+      let mut cohesion = CohesionRule::new(boid.position, flock.cohesion_weight);
       let mut separation = SeparationRule::new(flock.separation_distance, flock.separation_weight);
-      let mut alignment = AlignmentRule::new(flock.alignment_distance, flock.alignment_weight);
+      let mut alignment = AlignmentRule::new(flock.alignment_weight);
 
       for (other_ent, other_boid) in (&ents, &boids).join() {
         // Don't include self in calculations
@@ -44,12 +46,15 @@ impl<'s> System<'s> for DirectBoidsSystems {
         }
 
         let boid_separation = distance(&boid.position, &other_boid.position);
-        cohesion.process_boid(boid, other_boid, boid_separation);
-        separation.process_boid(boid, other_boid, boid_separation);
-        alignment.process_boid(boid, other_boid, boid_separation);
+        if boid_separation < flock.local_group_distance {
+          cohesion.process_boid(boid, other_boid, boid_separation);
+          separation.process_boid(boid, other_boid, boid_separation);
+          alignment.process_boid(boid, other_boid, boid_separation);
+        }
       }
       boid_intent.force =
-        cohesion.applied_force() +
+        BoundaryRule::applied_force(boundary, flock.boundary_force, boid) +
+          cohesion.applied_force() +
           separation.applied_force() +
           alignment.applied_force();
     }

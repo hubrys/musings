@@ -1,14 +1,12 @@
 (
     arena_size: (1200.0, 800.0),
-    boid_count: 100,
-    boid_max_speed: 100.0,
-
-    separation_weight: 4.0,
+    boid_count: 300,
+    boid_max_speed: 150.0,
+    local_group_distance: 300,
+    boundary_offset: 100.0,
+    boundary_force: 5.0,
+    separation_weight: 8.0,
     separation_distance: 20,
-
-    cohesion_weight: 0.1,
-    cohesion_distance: 500,
-
-    alignment_weight: 0.1,
-    alignment_distance: 250,
+    cohesion_weight: 0.2,
+    alignment_weight: 0.3,
 )
