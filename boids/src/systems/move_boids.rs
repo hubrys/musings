@@ -38,10 +38,6 @@ impl<'s> System<'s> for MoveBoidsSystem {
         boid.velocity = boid.velocity.normalize() * flock.boid_max_speed;
       }
 
-      if boid.position.x.is_nan() {
-        panic!("BOID POSITION IS NAN");
-      }
-
       boid.position.x += boid.velocity.x * time.delta_seconds();
       boid.position.y += boid.velocity.y * time.delta_seconds();
 

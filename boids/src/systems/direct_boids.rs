@@ -2,9 +2,11 @@ use amethyst::ecs::{System, SystemData, ReadStorage, WriteStorage, Join, Read};
 use amethyst::derive::SystemDesc;
 use amethyst::core::math::{Vector2};
 use amethyst::input::{InputHandler, StringBindings};
+use amethyst::core::ecs::Entities;
 use crate::components::{BoidIntent, Boid};
 use crate::config::FlockConfig;
-use amethyst::core::ecs::Entities;
+use crate::systems::boid_rules::base_rules::{SeparationRule, CohesionRule, AlignmentRule};
+use crate::systems::BoidRule;
 
 /// Moves boids based on simple rules
 /// rules:
@@ -31,13 +33,9 @@ impl<'s> System<'s> for DirectBoidsSystems {
     mut boid_intents
   ): Self::SystemData) {
     for (ent, boid, boid_intent) in (&ents, &boids, &mut boid_intents).join() {
-      // Center of mass
-      let mut com = Vector2::zeros();
-      let mut cohesion_count = 0;
-      let mut separation_vec = Vector2::zeros();
-
-      let mut velocity_count = 0;
-      let mut average_velocity = Vector2::zeros();
+      let mut cohesion = CohesionRule::new(boid.position, flock.cohesion_distance, flock.cohesion_weight);
+      let mut separation = SeparationRule::new(flock.separation_distance, flock.separation_weight);
+      let mut alignment = AlignmentRule::new(flock.alignment_distance, flock.alignment_weight);
 
       for (other_ent, other_boid) in (&ents, &boids).join() {
         // Don't include self in calculations
@@ -46,34 +44,14 @@ impl<'s> System<'s> for DirectBoidsSystems {
         }
 
         let boid_separation = distance(&boid.position, &other_boid.position);
-        // COHESION
-        if boid_separation < flock.cohesion_distance {
-          cohesion_count += 1;
-          com += other_boid.position;
-        }
-
-        // SEPARATION
-        if boid_separation < flock.separation_distance {
-          separation_vec = boid.position - other_boid.position;
-        }
-
-        // ALIGNMENT
-        if boid_separation < flock.alignment_distance {
-          velocity_count += 1;
-          average_velocity += other_boid.velocity;
-        }
+        cohesion.process_boid(boid, other_boid, boid_separation);
+        separation.process_boid(boid, other_boid, boid_separation);
+        alignment.process_boid(boid, other_boid, boid_separation);
       }
-      if cohesion_count != 0 {
-        com /= cohesion_count as f32;
-      }
-      if velocity_count != 0 {
-        average_velocity /= velocity_count as f32;
-      }
-      let cohesion_vec = com - boid.position;
       boid_intent.force =
-        cohesion_vec * flock.cohesion_weight +
-          separation_vec * flock.separation_weight +
-          average_velocity * flock.alignment_weight;
+        cohesion.applied_force() +
+          separation.applied_force() +
+          alignment.applied_force();
     }
   }
 }
