@@ -42,7 +42,6 @@ fn main() -> amethyst::Result<()> {
 
   let assets_dir = app_root.join("assets");
   let flock_config = FlockConfig::load(app_root.join("config/flock.ron")).unwrap();
-  // world.insert(flock_config);
   let mut game = Application::build(assets_dir, boids::Flock::default())?
     .with_resource(flock_config)
     .build(game_data)?;

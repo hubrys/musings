@@ -31,7 +31,6 @@ impl<'s> System<'s> for DirectBoidsSystems {
     mut boid_intents
   ): Self::SystemData) {
     for (ent, boid, boid_intent) in (&ents, &boids, &mut boid_intents).join() {
-      // TODO: Ignore the current boid
       // Center of mass
       let mut com = Vector2::zeros();
       let mut cohesion_count = 0;
@@ -63,10 +62,13 @@ impl<'s> System<'s> for DirectBoidsSystems {
           velocity_count += 1;
           average_velocity += other_boid.velocity;
         }
-
       }
-      com /= cohesion_count as f32;
-      average_velocity /= velocity_count as f32;
+      if cohesion_count != 0 {
+        com /= cohesion_count as f32;
+      }
+      if velocity_count != 0 {
+        average_velocity /= velocity_count as f32;
+      }
       let cohesion_vec = com - boid.position;
       boid_intent.force =
         cohesion_vec * flock.cohesion_weight +
