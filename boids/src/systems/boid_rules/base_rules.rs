@@ -1,6 +1,6 @@
 use amethyst::core::math::Vector2;
 use crate::systems::BoidRule;
-use crate::components::Boid;
+use crate::components::Movement;
 
 pub struct CohesionRule {
   boid_position: Vector2<f32>,
@@ -21,7 +21,7 @@ impl CohesionRule {
 }
 
 impl BoidRule for CohesionRule {
-  fn process_boid(&mut self, boid: &Boid, other_boid: &Boid, separation: f32) {
+  fn process_boid(&mut self, boid: &Movement, other_boid: &Movement, separation: f32) {
     self.count += 1;
     self.accumulator += other_boid.position;
   }
@@ -52,12 +52,9 @@ impl SeparationRule {
 }
 
 impl BoidRule for SeparationRule {
-  fn process_boid(&mut self, boid: &Boid, other_boid: &Boid, separation: f32) {
+  fn process_boid(&mut self, boid: &Movement, other_boid: &Movement, separation: f32) {
     if separation < self.separation_distance {
-      let vector = boid.position - other_boid.position;
-      let distance = vector.norm();
-      self.accumulator += vector / (distance / self.separation_distance);
-      // self.accumulator += boid.position - other_boid.position
+      self.accumulator += boid.position - other_boid.position
     }
   }
 
@@ -83,7 +80,7 @@ impl AlignmentRule {
 }
 
 impl BoidRule for AlignmentRule {
-  fn process_boid(&mut self, boid: &Boid, other_boid: &Boid, separation: f32) {
+  fn process_boid(&mut self, boid: &Movement, other_boid: &Movement, separation: f32) {
     self.count += 1;
     self.accumulator += other_boid.velocity;
   }
@@ -110,7 +107,7 @@ impl BoundaryRule {
     ]
   }
 
-  pub fn applied_force(boundary: [f32; 4], force: f32, boid: &Boid) -> Vector2<f32> {
+  pub fn applied_force(boundary: [f32; 4], force: f32, boid: &Movement) -> Vector2<f32> {
     let [left, top, right, bottom] = boundary;
     let position = boid.position;
     let x = {

@@ -2,7 +2,7 @@ use amethyst::ecs::{System, SystemData, ReadStorage, WriteStorage, Join, Read};
 use amethyst::core::{Transform, Time};
 use amethyst::derive::SystemDesc;
 
-use crate::components::{BoidIntent, Boid};
+use crate::components::{Forces, Movement};
 use crate::config::FlockConfig;
 use std::f32::consts::PI;
 use amethyst::core::num::Pow;
@@ -14,8 +14,8 @@ pub struct MoveBoidsSystem;
 impl<'s> System<'s> for MoveBoidsSystem {
   type SystemData = (
     WriteStorage<'s, Transform>,
-    WriteStorage<'s, Boid>,
-    ReadStorage<'s, BoidIntent>,
+    WriteStorage<'s, Movement>,
+    ReadStorage<'s, Forces>,
     Read<'s, Time>,
     Read<'s, FlockConfig>,
   );

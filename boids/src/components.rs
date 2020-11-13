@@ -1,42 +1,57 @@
 use amethyst::ecs::{Component, VecStorage};
 use amethyst::core::math::Vector2;
+use amethyst::core::ecs::NullStorage;
 
-pub struct BoidIntent {
+#[derive(Default)]
+pub struct Boid;
+
+impl Component for Boid {
+  type Storage = NullStorage<Self>;
+}
+
+#[derive(Default)]
+pub struct Enemy;
+
+impl Component for Enemy {
+  type Storage = NullStorage<Self>;
+}
+
+pub struct Forces {
   pub force: Vector2<f32>,
 }
 
-impl BoidIntent {
+impl Forces {
   pub fn force(&self) -> &Vector2<f32> {
     &self.force
   }
 }
 
-impl Default for BoidIntent {
+impl Default for Forces {
   fn default() -> Self {
-    BoidIntent {
+    Forces {
       force: Vector2::new(20.0, 0.0)
     }
   }
 }
 
-impl Component for BoidIntent {
+impl Component for Forces {
   type Storage = VecStorage<Self>;
 }
 
-pub struct Boid {
+pub struct Movement {
   pub position: Vector2<f32>,
   pub velocity: Vector2<f32>,
 }
 
-impl Default for Boid {
+impl Default for Movement {
   fn default() -> Self {
-    Boid {
+    Movement {
       position: Vector2::new(0.0, 0.0),
       velocity: Vector2::new(1.0, 0.0)
     }
   }
 }
 
-impl Component for Boid {
+impl Component for Movement {
   type Storage = VecStorage<Self>;
 }

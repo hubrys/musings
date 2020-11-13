@@ -12,6 +12,9 @@ pub struct FlockConfig {
   pub separation_distance: f32,
   pub cohesion_weight: f32,
   pub alignment_weight: f32,
+  pub enemy_count: u32,
+  pub enemy_separation_weight: f32,
+  pub enemy_separation_distance: f32
 }
 
 impl Default for FlockConfig {
@@ -27,6 +30,9 @@ impl Default for FlockConfig {
       separation_distance: 0.0,
       cohesion_weight: 1.0,
       alignment_weight: 1.0,
+      enemy_count: 1,
+      enemy_separation_weight: 0.0,
+      enemy_separation_distance: 0.0
     }
   }
 }
