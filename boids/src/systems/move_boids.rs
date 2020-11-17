@@ -47,7 +47,7 @@ impl<'s> System<'s> for MoveBoidsSystem {
     }
 
 
-    if time.frame_number() % 100 == 0 {
+    if time.frame_number() % 50 == 0 {
       let fps = time.frame_number() as f64 / time.absolute_time_seconds();
       println!("FPS: {}", fps);
     }

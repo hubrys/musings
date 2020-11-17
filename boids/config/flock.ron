@@ -1,6 +1,6 @@
 (
     arena_size: (1200.0, 800.0),
-    boid_count: 100,
+    boid_count: 200 ,
     boid_max_speed: 150.0,
     local_group_distance: 300,
     boundary_offset: 100.0,

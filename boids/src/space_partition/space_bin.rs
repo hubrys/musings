@@ -3,8 +3,8 @@ use crate::components::Movement;
 
 #[derive(Default)]
 pub struct TiledSpacePointer {
-  id: u32,
-  tile_index: usize
+  pub id: u32,
+  pub tile_index: usize
 }
 
 struct NodeElement<T>(u32, T);
@@ -25,12 +25,6 @@ pub struct TiledSpace<T> {
   tile_width: f32,
   grid: Vec<Node<T>>
 }
-
-// impl Default for TiledSpace<&Movement> {
-//   fn default() -> Self {
-//     unimplemented!()
-//   }
-// }
 
 impl<T> TiledSpace<T> {
   pub fn new(space_width: f32, space_height: f32, width: usize, height: usize) -> TiledSpace<T> {
@@ -103,16 +97,26 @@ impl<T> TiledSpace<T> {
   }
 
   pub fn get_elems(&self, boundary: [f32; 4]) -> Iter<T> {
-    Iter {
-      start_x: (boundary[0] / self.tile_width).min(0.0).max(self.space_width) as usize,
-      start_y: (boundary[1] /self.tile_height).min(0.0).max(self.space_height) as usize,
-      end_x: (boundary[2] / self.tile_width).min(0.0).max(self.space_width) as usize,
-      end_y: (boundary[3] / self.tile_height).min(0.0).max(self.space_height) as usize,
+    // println!(
+    //   "x: {}, y: {}, x2: {}, y2: {}",
+    //   (boundary[0] / self.tile_width).max(0.0).min(self.space_width) as usize,
+    //   (boundary[1] /self.tile_height).max(0.0).min(self.space_height) as usize,
+    //   (boundary[2] / self.tile_width).max(0.0).min(self.space_width) as usize,
+    //   (boundary[3] / self.tile_height).max(0.0).min(self.space_height) as usize,
+    // );
+
+    let mut iter = Iter {
+      start_x: (boundary[0] / self.tile_width).max(0.0).min(self.space_width) as usize,
+      start_y: (boundary[1] /self.tile_height).max(0.0).min(self.space_height) as usize,
+      end_x: (boundary[2] / self.tile_width).max(0.0).min(self.space_width) as usize,
+      end_y: (boundary[3] / self.tile_height).max(0.0).min(self.space_height) as usize,
       grid_width: self.width,
       grid_index: 0,
       node_iter: None,
       grid: &self.grid
-    }
+    };
+    iter.init();
+    iter
   }
 }
 
@@ -134,11 +138,14 @@ impl<'a, T> Iter<'a, T> {
   }
 
   fn set_node_iter(&mut self) {
-    let search_width  = self.end_x - self.start_x;
+    let mut search_width  = self.end_x - self.start_x;
+    if search_width == 0 {
+      search_width = 1
+    }
     let real_x = (self.grid_index % search_width) + self.start_x;
     let real_y = (self.grid_index / search_width) + self.start_y;
     self.node_iter = {
-      if real_y > self.end_y {
+      if real_y >= self.end_y {
         None
       } else {
         let real_index = real_y * self.grid_width + real_x;
@@ -159,6 +166,7 @@ impl<'a, T: Copy> Iterator for Iter<'a, T> {
         if let None = maybe_value {
           // go to next node
           self.grid_index += 1;
+          self.set_node_iter();
           return self.next()
         }
         maybe_value.map(|elem| {

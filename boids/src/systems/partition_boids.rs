@@ -46,7 +46,7 @@ impl<'s> System<'s> for PartitionBoidsSystem {
       pointer.ptr = grid.add_elem(movement.position, ent.id());
     }
 
-    for (ent, movement, pointer, _) in (&ents, &movements, &mut pointers, !&self.added).join() {
+    for (movement, pointer, _) in (&movements, &mut pointers, !&self.added).join() {
       grid.move_elem(&mut pointer.ptr, movement.position);
     }
   }

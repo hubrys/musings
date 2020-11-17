@@ -41,7 +41,7 @@ fn main() -> amethyst::Result<()> {
     .with_bundle(TransformBundle::new())?
     .with_bundle(input_bundle)?
     .with_system_desc(systems::PartitionBoidsSystem::default(), "partition_boids", &[])
-    .with_system_desc(systems::DirectBoidsSystems, "direct_boids", &["partition_boids"])
+    .with_system_desc(systems::DirectBoidsSystems::new(), "direct_boids", &["partition_boids"])
     .with_system_desc(systems::MoveBoidsSystem, "move_boids", &["direct_boids"]);
 
   let assets_dir = app_root.join("assets");
