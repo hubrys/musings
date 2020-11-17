@@ -1,6 +1,7 @@
 use amethyst::ecs::{Component, VecStorage};
 use amethyst::core::math::Vector2;
-use amethyst::core::ecs::NullStorage;
+use amethyst::core::ecs::{NullStorage, FlaggedStorage};
+use crate::space_partition::TiledSpacePointer;
 
 #[derive(Default)]
 pub struct Boid;
@@ -54,4 +55,13 @@ impl Default for Movement {
 
 impl Component for Movement {
   type Storage = VecStorage<Self>;
+}
+
+#[derive(Default)]
+pub struct SpacePointer {
+  pub ptr: TiledSpacePointer
+}
+
+impl Component for SpacePointer {
+  type Storage = FlaggedStorage<Self, VecStorage<Self>>;
 }

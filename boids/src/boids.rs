@@ -6,15 +6,16 @@ use amethyst::core::math::{Vector2, Vector3};
 use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode};
 use amethyst::renderer::{Camera, SpriteSheet, Texture, ImageFormat, SpriteSheetFormat, SpriteRender};
 use rand::Rng;
-use crate::components::{Forces, Movement, Boid, Enemy};
+use crate::components::{Forces, Movement, Boid, Enemy, SpacePointer};
 use crate::config::FlockConfig;
+use crate::space_partition::TiledSpace;
 
 #[derive(Default)]
 pub struct Flock {}
 
 impl SimpleState for Flock {
   fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-    let world = data.world;
+    let mut world = data.world;
     let (arena_size, boid_count, enemy_count) = {
       let config = world.read_resource::<FlockConfig>();
       (config.arena_size, config.boid_count, config.enemy_count)
@@ -23,7 +24,7 @@ impl SimpleState for Flock {
     let sprite_sheet = load_sprite_sheet(world, "textures/triangle");
     let sprite_render = SpriteRender::new(sprite_sheet, 0);
     let mut rng = rand::thread_rng();
-    for i in 0..boid_count {
+    for _ in 0..boid_count {
       let x = rng.gen_range(0.0, arena_size[0]);
       let y = rng.gen_range(0.0, arena_size[1]);
       create_boid(
@@ -35,7 +36,7 @@ impl SimpleState for Flock {
 
     let enemy_sprite_sheet = load_sprite_sheet(world, "textures/circle");
     let enemy_sprite_render = SpriteRender::new(enemy_sprite_sheet, 0);
-    for i in 0..enemy_count {
+    for _ in 0..enemy_count {
       let x = rng.gen_range(0.0, arena_size[0]);
       let y = rng.gen_range(0.0, arena_size[1]);
       create_enemy(
@@ -92,6 +93,7 @@ fn create_boid(
       position: Vector2::new(location[0], location[1]),
       velocity: Vector2::new(0.0, 0.0),
     })
+    .with(SpacePointer::default())
     .with(Forces::default())
     .build();
 }

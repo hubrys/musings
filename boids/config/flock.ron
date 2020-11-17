@@ -11,5 +11,5 @@
     alignment_weight: 0.3,
     enemy_count: 1,
     enemy_separation_distance: 100.0,
-    enemy_separation_weight: 3.0
+    enemy_separation_weight: 10.0
 )

@@ -21,7 +21,7 @@ impl CohesionRule {
 }
 
 impl BoidRule for CohesionRule {
-  fn process_boid(&mut self, boid: &Movement, other_boid: &Movement, separation: f32) {
+  fn process_boid(&mut self, _boid: &Movement, other_boid: &Movement, _separation: f32) {
     self.count += 1;
     self.accumulator += other_boid.position;
   }
@@ -80,7 +80,7 @@ impl AlignmentRule {
 }
 
 impl BoidRule for AlignmentRule {
-  fn process_boid(&mut self, boid: &Movement, other_boid: &Movement, separation: f32) {
+  fn process_boid(&mut self, _boid: &Movement, other_boid: &Movement, _separation: f32) {
     self.count += 1;
     self.accumulator += other_boid.velocity;
   }

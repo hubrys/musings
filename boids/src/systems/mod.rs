@@ -1,10 +1,12 @@
 pub use move_boids::MoveBoidsSystem;
 pub use direct_boids::DirectBoidsSystems;
+pub use partition_boids::PartitionBoidsSystem;
 use crate::components::Movement;
 use amethyst::core::math::Vector2;
 
 mod direct_boids;
 mod move_boids;
+mod partition_boids;
 pub mod boid_rules;
 
 pub trait BoidRule {
