@@ -19,6 +19,12 @@ pub struct Graph<T, E> {
   edges: HashMap<NodeId, HashMap<NodeId, E>>,
 }
 
+impl<V, E> Default for Graph<V, E> {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl<V, E> Graph<V, E> {
   pub fn new() -> Self {
     Graph {

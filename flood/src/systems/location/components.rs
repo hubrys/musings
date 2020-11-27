@@ -1,20 +1,27 @@
 use amethyst::core::ecs::{Component, VecStorage};
-use amethyst::core::math::{Vector2};
+use amethyst::core::math::{Point2};
 
 pub struct Location {
-  pos: Vector2<f32>,
-  grid_pos: Vector2<u32>
-}
-
-impl Location {
-  pub fn new(x: u32, y: u32) -> Self {
-    Location {
-      pos: Vector2::new(x as f32, y as f32),
-      grid_pos: Vector2::new(x, y)
-    }
-  }
+  pub pos: Point2<f32>
 }
 
 impl Component for Location {
   type Storage = VecStorage<Self>;
 }
+
+impl Location {
+  pub fn new(x: f32, y: f32) -> Self {
+    Location {
+      pos: Point2::new(x, y)
+    }
+  }
+
+  pub fn x(&self) -> f32 {
+    self.pos.x
+  }
+
+  pub fn y(&self) -> f32 {
+    self.pos.y
+  }
+}
+

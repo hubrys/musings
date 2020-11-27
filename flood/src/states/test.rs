@@ -1,7 +1,7 @@
 use amethyst::{SimpleState, StateData, GameData, StateEvent, SimpleTrans, Trans};
 use amethyst::input::{is_close_requested, is_key_down, VirtualKeyCode};
 use crate::utils;
-use amethyst::renderer::{SpriteRender, SpriteSheet};
+use amethyst::renderer::{SpriteSheet};
 use std::collections::HashMap;
 use amethyst::assets::Handle;
 use amethyst::shred::World;
@@ -32,5 +32,3 @@ impl SimpleState for Test {
     }
   }
 }
-
-fn add_node(world: &mut World, location: Vector2<f32>) {}

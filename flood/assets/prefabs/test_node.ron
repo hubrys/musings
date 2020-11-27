@@ -1,0 +1,16 @@
+#![enable(implicit_some)]
+Prefab(
+  entities: [
+    (
+      data: NodePrefabData (
+        log_node: LogisticsNode (
+          reach: 50.0,
+          travel_speed: 1.0
+        ),
+        tint: (
+          data: (1.0, 0.0, 0.0, 1.0)
+        )
+      ),
+    ),
+  ],
+)

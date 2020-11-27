@@ -1,15 +1,18 @@
 use amethyst::utils::application_root_dir;
 use amethyst::{GameDataBuilder, Application};
-use amethyst::renderer::{RenderToWindow, RenderFlat2D, RenderingBundle, SpriteSheet};
+use amethyst::renderer::{RenderToWindow, RenderFlat2D, RenderingBundle, SpriteSheet, RenderDebugLines};
 use amethyst::renderer::types::DefaultBackend;
 use amethyst::core::TransformBundle;
 use amethyst::input::{InputBundle, StringBindings};
-use amethyst::assets::Handle;
+use amethyst::assets::{Handle, PrefabLoaderSystemDesc};
 use std::collections::HashMap;
+use crate::systems::logistics::LogisticsBundle;
+use crate::prefabs::NodePrefabData;
 
 mod systems;
 mod states;
 mod utils;
+mod prefabs;
 
 #[derive(Default)]
 pub struct TextureCache {
@@ -24,7 +27,6 @@ fn main() -> amethyst::Result<()> {
   let input_bundle = InputBundle::<StringBindings>::new()
     .with_bindings_from_file(bindings_config_path)?;
 
-
   let game_data = GameDataBuilder::default()
     .with_bundle(
       RenderingBundle::<DefaultBackend>::new()
@@ -33,9 +35,12 @@ fn main() -> amethyst::Result<()> {
             .with_clear([0.0, 0.0, 0.0, 1.0])
         )
         .with_plugin(RenderFlat2D::default())
+        .with_plugin(RenderDebugLines::default())
     )?
     .with_bundle(TransformBundle::new())?
     .with_bundle(input_bundle)?
+    .with_bundle(LogisticsBundle)?
+    .with_system_desc(PrefabLoaderSystemDesc::<NodePrefabData>::default(), "", &[])
     .with_system_desc(
       systems::input::TestInputSystem::default(),
       "test_input",

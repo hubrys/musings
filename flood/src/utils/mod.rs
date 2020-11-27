@@ -1,5 +1,5 @@
 use amethyst::shred::World;
-use amethyst::assets::{Handle, Loader, AssetStorage, Progress, ProgressCounter};
+use amethyst::assets::{Handle, Loader, AssetStorage, ProgressCounter};
 use amethyst::renderer::{SpriteSheet, Texture, ImageFormat, SpriteSheetFormat, Camera};
 use amethyst::core::ecs::{WorldExt, Builder, Entity};
 use amethyst::core::Transform;
